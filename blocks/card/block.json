@@ -1,0 +1,44 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "kj/card",
+    "version": "0.1.0",
+    "title": "Card",
+    "category": "media",
+    "icon": "star-filled",
+    "description": "A card.",
+    "example": {},
+    "supports": {
+        "html": false,
+        "color": {
+            "text": true,
+            "background": true
+        },
+        "spacing": {
+            "margin": true,
+            "padding": true
+        }
+    },
+    "attributes": {
+        "mediaURL": {
+            "type": "string",
+            "default": ""
+        },
+        "mediaID": {
+            "type": "number",
+            "default": 0
+        },
+        "content": {
+            "type": "string",
+            "source": "html",
+            "selector": "p"
+        },
+        "url": {
+            "type": "string",
+            "source": "attribute",
+            "selector": "a",
+            "attribute": "href"
+        }
+    },
+    "textdomain": "card"
+}

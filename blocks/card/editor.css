@@ -1,0 +1,23 @@
+.wp-block-kj-card {
+    .block-editor-url-input__button {
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        visibility: hidden;
+    }
+
+    button.media-upload {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translateX(-50%) translateY(-50%);
+        visibility: hidden;
+    }
+
+    &:hover {
+        .block-editor-url-input__button,
+        button.media-upload {
+            visibility: visible;
+        }
+    }
+}
