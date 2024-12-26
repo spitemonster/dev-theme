@@ -1,0 +1,26 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "kj/posts",
+    "version": "0.1.0",
+    "title": "Posts",
+    "category": "design",
+    "icon": "smiley",
+    "description": "Display selected posts.",
+    "example": {},
+    "supports": {
+        "html": false
+    },
+    "attributes": {
+        "postType": {
+            "type": "string",
+            "default": ""
+        },
+        "postCount": {
+            "type": "number",
+            "default": 5
+        }
+    },
+    "textdomain": "posts",
+    "render": "file:./render.php"
+}

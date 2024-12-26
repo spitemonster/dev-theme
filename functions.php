@@ -15,5 +15,6 @@
     },
     [
         'blocks',
+		'post-types'
     ]
 );
