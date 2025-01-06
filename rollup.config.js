@@ -2,7 +2,6 @@ import postcss from 'rollup-plugin-postcss'
 import postcssNesting from 'postcss-nesting'
 import autoprefixer from 'autoprefixer'
 import postcssImport from 'postcss-import'
-import resolve from '@rollup/plugin-node-resolve'
 import commonjs from '@rollup/plugin-commonjs'
 import json from '@rollup/plugin-json'
 import { babel } from '@rollup/plugin-babel'
@@ -25,56 +24,61 @@ function fileExists(name) {
     }
 }
 
-// probably a more efficient method for setting up config but ¯\_(ツ)_/¯
-let config = [
-    {
-        input: './src/js/main.js',
+function jsConfig(name) {
+    return {
+        input: `./src/js/${name}.js`,
         output: {
-            file: './assets/js/main.js',
+            file: `./assets/js/${name}.min.js`,
             format: 'iife',
+            minimize: true,
         },
-        plugins: [resolve(), commonjs(), babel({ babelHelpers: 'bundled' })],
-    },
-    {
-        input: './src/js/editor.js',
-        output: {
-            file: './assets/js/editor.js',
-            format: 'iife',
-        },
-        plugins: [resolve(), commonjs(), babel({ babelHelpers: 'bundled' })],
-    },
-    {
-        input: './src/css/main.css',
-        output: {
-            file: './assets/css/main.css',
-        },
-        plugins: [
-            postcss({
-                extract: true,
-                minimize: true,
-                syntax: 'postcss-scss',
-                plugins: [postcssImport(), autoprefixer(), postcssNesting()],
-            }),
-        ],
-    },
-    {
-        input: './src/css/editor.css',
-        output: {
-            file: './assets/css/editor.css',
-        },
-        plugins: [
-            postcss({
-                extract: true,
-                minimize: true,
-                syntax: 'postcss-scss',
-                plugins: [postcssImport(), autoprefixer(), postcssNesting()],
-            }),
-        ],
-    },
-]
+        plugins: jsPluginConfig,
+    }
+}
 
-const blocksDir = './blocks'
-const blocks = getDirectories(blocksDir)
+function cssConfig(name) {
+    return {
+        input: `./src/css/${name}.css`,
+        output: {
+            file: `./assets/css/${name}.min.css`,
+        },
+        plugins: cssPluginConfig,
+    }
+}
+
+function blockScriptConfig(name, blockPath, outputPath) {
+    let srcPath = path.join(blockPath, `${name}.js`)
+    if (!fileExists(srcPath)) {
+        return
+    }
+
+    return {
+        input: srcPath,
+        output: {
+            file: `${outputPath}/${name}.min.js`,
+            format: 'iife',
+            minimize: true,
+        },
+        plugins: jsPluginConfig,
+    }
+}
+
+function blockStyleConfig(name, blockPath, outputPath) {
+    let srcPath = path.join(blockPath, `${name}.css`)
+
+    if (!fileExists(srcPath)) {
+        return
+    }
+
+    return {
+        input: srcPath,
+        output: {
+            file: `${outputPath}/${name}.min.css`,
+        },
+        plugins: cssPluginConfig,
+    }
+}
+
 const cssPluginConfig = [
     postcss({
         extract: true,
@@ -88,68 +92,60 @@ const jsPluginConfig = [
     json({ compact: true }),
     babel({
         babelHelpers: 'bundled',
-        presets: ['@babel/preset-env', '@babel/preset-react'], // JSX
+        presets: ['@babel/preset-env', '@babel/preset-react'],
     }),
     commonjs(),
     wpResolve(),
 ]
 
+let config = []
+
+// core setup for main (frontend), admin and editor scripts and styles
+const core = ['main', 'admin', 'editor']
+core.forEach((name) => {
+    config.push(cssConfig(name), jsConfig(name))
+})
+
+// block config setup
+const blocksDir = './blocks'
+const blocks = getDirectories(blocksDir)
+
 // add custom blocks to config
 blocks.forEach((blockName) => {
-    const blockConfig = []
-
     const blockPath = path.join(blocksDir, blockName)
     const outputPath = `assets/blocks/${blockName}`
 
-    // Check for JavaScript and CSS files
-    const mainScript = path.join(blockPath, 'index.js')
-    const viewScript = path.join(blockPath, 'view.js')
-    const mainStyle = path.join(blockPath, 'style.css')
-    const editorStyle = path.join(blockPath, 'editor.css')
+    // // Check for JavaScript and CSS files
+    // const editorScript = path.join(blockPath, 'index.js')
+    // const viewScript = path.join(blockPath, 'view.js')
+    // const mainStyle = path.join(blockPath, 'style.css')
+    // const editorStyle = path.join(blockPath, 'editor.css')
 
-    if (fileExists(mainScript)) {
-        blockConfig.push({
-            input: mainScript,
-            output: {
-                file: `${outputPath}/index.min.js`,
-                format: 'iife',
-            },
-            plugins: jsPluginConfig,
-        })
-    }
+    const scriptArr = ['index', 'view']
+    const styleArr = [`style`, `editor`]
 
-    if (fileExists(viewScript)) {
-        blockConfig.push({
-            input: viewScript,
-            output: {
-                file: `${outputPath}/view.min.js`,
-                format: 'iife',
-            },
-            plugins: jsPluginConfig,
-        })
-    }
+    console.log(scriptArr)
+    console.log(styleArr)
 
-    if (fileExists(mainStyle)) {
-        blockConfig.push({
-            input: mainStyle,
-            output: {
-                file: `${outputPath}/style.min.css`,
-            },
-            plugins: cssPluginConfig,
-        })
-    }
+    scriptArr.forEach((script) => {
+        const blockJsConfig = blockScriptConfig(script, blockPath, outputPath)
+        if (blockJsConfig) {
+            config.push(blockJsConfig)
+        } else {
+            console.log(`${script} script doesn't exist`)
+        }
+    })
 
-    if (fileExists(editorStyle)) {
-        blockConfig.push({
-            input: editorStyle,
-            output: {
-                file: `${outputPath}/editor.min.css`,
-            },
-            plugins: cssPluginConfig,
-        })
-    }
-
-    config = [...config, ...blockConfig]
+    styleArr.forEach((style) => {
+        const blockCssConfig = blockStyleConfig(style, blockPath, outputPath)
+        if (blockCssConfig) {
+            config.push(blockCssConfig)
+        } else {
+            console.log(`${style} style doesn't exist`)
+        }
+    })
 })
+
+console.log(config)
 
 export default config

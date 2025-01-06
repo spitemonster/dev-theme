@@ -1,0 +1,17 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "kj/testimonial-slider",
+    "version": "0.1.0",
+    "title": "Testimonial Slider",
+    "category": "design",
+    "icon": "gallery",
+    "description": "Display selected posts.",
+    "example": {},
+    "supports": {
+        "html": false
+    },
+    "attributes": {},
+    "textdomain": "testimonial-slider",
+    "render": "file:./render.php"
+}

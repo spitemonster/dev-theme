@@ -10,18 +10,4 @@ i've been moving away from scss for a long time with a preference for postCSS an
 
 ## requirements
 
-uses deno's standard library so will not be compatible with npm out of the box.
-
-## areas for improvement
-
-i am not certain about how i am registering blocks; there is a lot of `file_exists` checking which i know can be kind of slow, so i am very open to input on how this could be improved.
-
-## blocks
-
-### card
-
-a simple static block that allows the user to select an image, a caption and a url and renders an optionally linked figure on the front end.
-
-### posts
-
-a simple dynamic block that displays a list of posts of a given post type.
+uses [deno](https://deno.com/)'s standard library in rollup config so will not be compatible with npm out of the box. deno is easy to set up out of the box and i would recommend it fully.

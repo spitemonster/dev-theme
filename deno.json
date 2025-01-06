@@ -1,10 +1,31 @@
 {
+    "tasks": {
+        "dev": "deno run clean && deno run rollup-watch",
+        "build": "deno run clean && deno run rollup",
+        "rollup": "rollup -c ./rollup.config.js",
+        "rollup-watch": "rollup -c ./rollup.config.js -w",
+        "clean": "rm -rf ./assets/blocks/ && rm -rf ./assets/css && rm -rf ./assets/js",
+        "create-block": "npx @wordpress/create-block@latest --no-plugin"
+    },
     "imports": {
         "@std/assert": "jsr:@std/assert@1",
         "@wordpress/blocks": "npm:@wordpress/blocks@^14.3.0",
         "rollup": "npm:rollup@^4.29.1",
         "postcss-import": "npm:postcss-import@^16.1.0",
         "rollup-plugin-postcss": "npm:rollup-plugin-postcss@^4.0.2",
-        "rollup-plugin-watch": "npm:rollup-plugin-watch@^1.0.4"
+        "rollup-plugin-watch": "npm:rollup-plugin-watch@^1.0.4",
+        "@babel/core": "npm:@babel/core@^7.24.4",
+        "@babel/preset-env": "npm:@babel/preset-env@^7.24.4",
+        "@babel/preset-react": "npm:@babel/preset-react@^7.24.1",
+        "@rollup/plugin-babel": "npm:@rollup/plugin-babel@^6.0.4",
+        "@rollup/plugin-commonjs": "npm:@rollup/plugin-commonjs@^25.0.8",
+        "@rollup/plugin-json": "npm:@rollup/plugin-json@^6.1.0",
+        "@rollup/plugin-node-resolve": "npm:@rollup/plugin-node-resolve@^15.2.3",
+        "autoprefixer": "npm:autoprefixer@^10.4.19",
+        "postcss-comment": "npm:postcss-comment@^2.0.0",
+        "postcss-nesting": "npm:postcss-nesting@^12.1.2",
+        "postcss-scss": "npm:postcss-scss@^4.0.9",
+        "rollup-plugin-wp-resolve": "npm:rollup-plugin-wp-resolve@^1.0.9",
+        "@wordpress/i18n": "npm:@wordpress/i18n@^5.14.0"
     }
 }
