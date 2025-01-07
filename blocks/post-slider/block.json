@@ -11,7 +11,16 @@
     "supports": {
         "html": false
     },
-    "attributes": {},
+    "attributes": {
+        "selectedPostType": {
+            "type": "string",
+            "default": "post"
+        },
+        "selectedPosts": {
+            "type": "array",
+            "default": []
+        }
+    },
     "textdomain": "testimonial-slider",
     "render": "file:./render.php"
 }
