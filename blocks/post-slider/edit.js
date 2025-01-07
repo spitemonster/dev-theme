@@ -54,6 +54,7 @@ export default function Edit({ attributes, setAttributes }) {
               title: post.title.rendered,
               excerpt: post.excerpt,
               featuredImage: post.featuredImage,
+              permalink: post.permalink,
           }))
         : []
 

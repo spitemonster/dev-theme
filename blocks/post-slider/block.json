@@ -1,12 +1,12 @@
 {
     "$schema": "https://schemas.wp.org/trunk/block.json",
     "apiVersion": 3,
-    "name": "kj/testimonial-slider",
+    "name": "kj/post-slider",
     "version": "0.1.0",
-    "title": "Testimonial Slider",
+    "title": "Post Slider",
     "category": "design",
     "icon": "gallery",
-    "description": "Display selected posts.",
+    "description": "Display selected posts in a slider.",
     "example": {},
     "supports": {
         "html": false
