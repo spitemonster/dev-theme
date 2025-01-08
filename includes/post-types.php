@@ -47,6 +47,6 @@ add_action('init', function()
 		"menu_icon" => "dashicons-media-document",
 		"menu_position" => 6,
 		"show_in_rest" => true,
-		"rewrite" => ["slug" => "testimonials", "with_front" => false],
+		"rewrite" => ["slug" => "testimonials", "with_front" => true],
 	]);
 });

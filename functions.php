@@ -50,5 +50,5 @@ add_action( 'admin_enqueue_scripts', function( $hook ) {
 
 add_action('wp_enqueue_scripts', function() {
 	wp_enqueue_style('main-style', get_stylesheet_directory_uri() . '/assets/css/main.min.css');
-	wp_enqueue_script('main-script', get_stylesheet_directory_uri() . '/assets/js/main.min.cs');
+	wp_enqueue_script('main-script', get_stylesheet_directory_uri() . '/assets/js/main.min.js');
 });

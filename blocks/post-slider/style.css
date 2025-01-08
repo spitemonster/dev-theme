@@ -1,5 +1,20 @@
-.wp-block-kj-posts {
-    background-color: #21759b;
-    color: #fff;
-    padding: 2px;
+.post-slider {
+    ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        display: flex;
+        gap: 1rem;
+    }
+}
+
+.post-card {
+    display: block;
+    max-width: 100%;
+
+    img {
+        display: block;
+        max-width: 100%;
+        height: auto;
+    }
 }

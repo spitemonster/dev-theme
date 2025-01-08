@@ -1,6 +1,5 @@
 import { __ } from '@wordpress/i18n'
 import { useBlockProps, InspectorControls } from '@wordpress/block-editor'
-
 import { useSelect } from '@wordpress/data'
 import { SelectControl, PanelBody, FormTokenField } from '@wordpress/components'
 import { useState, useEffect } from 'react'
@@ -43,33 +42,43 @@ export default function Edit({ attributes, setAttributes }) {
         (select) =>
             select('core').getEntityRecords('postType', selectedPostType, {
                 per_page: -1,
+                _embed: true,
             }),
         [selectedPostType]
     )
 
     // cannot express how fucking annoyed I am that I cannot get this to indent correctly
     const postOptions = posts
-        ? posts.map((post) => ({
-              id: post.id,
-              title: post.title.rendered,
-              excerpt: post.excerpt,
-              featuredImage: post.featuredImage,
-              permalink: post.permalink,
-          }))
+        ? posts.map((post) => {
+              return {
+                  id: post.id,
+                  title: post.title.raw,
+                  excerpt: post.excerpt.raw,
+                  featuredImage: post.featured_media,
+              }
+          })
         : []
 
     const handlePostSelection = (tokens) => {
-        console.log(tokens)
         const selected = tokens
             .map((token) => {
                 const matchingPost = postOptions.find(
                     (post) => post.title === token
                 )
-                return matchingPost ? matchingPost : null
+
+                if (matchingPost == null) {
+                    return null
+                }
+
+                return {
+                    id: matchingPost.id,
+                    title: matchingPost.title.raw,
+                    excerpt: matchingPost.excerpt.raw,
+                    featuredImage: matchingPost.featured_media,
+                }
             })
             .filter(Boolean)
 
-        console.log(selected)
         setAttributes({ selectedPosts: selected })
     }
 
@@ -113,8 +122,36 @@ export default function Edit({ attributes, setAttributes }) {
 
                 {selectedPosts && selectedPosts.length > 0 && (
                     <ul>
-                        {selectedPosts.map((post) => (
-                            <li>{post.title}</li>
+                        {selectedPosts.map((post, index) => (
+                            <li key={index}>
+                                {console.log('post', post)}
+                                {console.log('img: ', post.featuredImage)}
+                                {console.log(
+                                    'featured: ',
+                                    post.featuredImage,
+                                    useSelect((select) => {
+                                        select('core').getMedia(
+                                            post.featuredImage
+                                        )
+                                    })
+                                )}
+                                <figure className="post-card">
+                                    {post.featuredImage ? (
+                                        <img
+                                            src={wp.data
+                                                .select('core')
+                                                .getMedia(post.featuredImage)}
+                                        />
+                                    ) : (
+                                        <h1>No fallback image</h1>
+                                    )}
+                                    <figcaption>
+                                        {post?.excerpt?.raw != ''
+                                            ? post.excerpt?.raw
+                                            : post.title}
+                                    </figcaption>
+                                </figure>
+                            </li>
                         ))}
                     </ul>
                 )}
