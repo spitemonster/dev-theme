@@ -1,5 +1,5 @@
 <?php
-$block_dirs = glob(get_stylesheet_directory() . '/blocks/*/');
+$block_dirs = glob(get_stylesheet_directory() . '/blocks/*/', GLOB_ONLYDIR);
 
 add_action('init', function () use ($block_dirs) {
     foreach ($block_dirs as $block_dir) {
@@ -92,21 +92,50 @@ add_action('enqueue_block_editor_assets', function() use ($block_dirs) {
 
 // front end scripts and styles
 add_action('enqueue_block_assets', function () use ($block_dirs)  {
-	foreach ($block_dirs as $block_dir) {
-		$block_json = $block_dir . 'block.json';
+	$block_cache_key = 'block_view_assets';
 
-		if (!file_exists($block_json)) {
-			continue;
-		}
+	// test if there have been any updates to any block directories
+	// if so, clear the transient and rebuild it
+	$last_modified = array_reduce($block_dirs, function ($carry, $dir) {
+        return max($carry, filemtime($dir));
+    }, 0);
 
-		$block_name = basename($block_dir);
+	$cached_last_modified = get_transient($block_cache_key . '_timestamp');
+
+	if ($cached_last_modified != $last_modified) {
+		delete_transient($block_cache_key);
+		set_transient($block_cache_key . "_timestamp", $last_modified, HOUR_IN_SECONDS);
+	}
+
+	// to prevent a bunch of file_exists looks ups, cache the presence of view scripts and/or styles per block
+    $block_assets = get_transient($block_cache_key);
+
+    if ($block_assets === false) {
+        $block_assets = [];
+
+        foreach ($block_dirs as $block_dir) {
+            $block_name = basename($block_dir);
+            $block_dist_path = trailingslashit(get_stylesheet_directory() . '/assets/blocks/' . $block_name);
+
+            $block_assets[$block_name] = [
+                'has_script' => file_exists($block_dist_path . 'view.min.js'),
+                'has_style' => file_exists($block_dist_path . 'style.min.css'),
+            ];
+        }
+        set_transient($block_cache_key, $block_assets, HOUR_IN_SECONDS);
+    }
+
+	foreach ($block_assets as $block_name => $files) {
+		// $block_json = $block_dir . 'block.json';
+		$scoped_name = "kj/" . $block_name;
+
 		$block_dist_path = trailingslashit(get_stylesheet_directory() . '/assets/blocks/' . $block_name);
 		$block_dist_uri = trailingslashit(get_template_directory_uri() . '/assets/blocks/' . $block_name);
 
 		$view_script_name = $block_name . '-view-script';
 		$view_style_name = $block_name . '-view-style';
 
-		if (file_exists($block_dist_path . 'view.min.js')) {
+		if ($files['has_script'] && has_block($scoped_name)) {
 			wp_enqueue_script(
 				$view_script_name, 
 				$block_dist_uri . 'view.min.js', 
@@ -114,7 +143,7 @@ add_action('enqueue_block_assets', function () use ($block_dirs)  {
 			);
 		}
 
-		if (file_exists($block_dist_path . 'style.min.css')) {
+		if ($files['has_style'] && has_block($scoped_name)) {
 
 			wp_enqueue_style(
 				$view_style_name, 
