@@ -1,4 +1,6 @@
 import postcss from 'rollup-plugin-postcss'
+import resolve from '@rollup/plugin-node-resolve'
+import replace from '@rollup/plugin-replace'
 import postcssNesting from 'postcss-nesting'
 import autoprefixer from 'autoprefixer'
 import postcssImport from 'postcss-import'
@@ -89,6 +91,11 @@ const cssPluginConfig = [
 ]
 
 const jsPluginConfig = [
+    replace({
+        preventAssignment: true,
+        'process.env.NODE_ENV': JSON.stringify('production'),
+    }),
+    resolve(),
     json({ compact: true }),
     babel({
         babelHelpers: 'bundled',
