@@ -9,78 +9,30 @@ import commonjs from '@rollup/plugin-commonjs'
 import json from '@rollup/plugin-json'
 import { babel } from '@rollup/plugin-babel'
 import wpResolve from 'rollup-plugin-wp-resolve'
-import * as fs from 'node:fs'
-import * as path from 'jsr:@std/path'
+import glob from 'fast-glob'
+// import fs from ''
 
-// function names should be self explanatory
-function getDirectories(path) {
-    return fs.readdirSync(path).filter(function (file) {
-        return fs.statSync(path + '/' + file).isDirectory()
-    })
+const isProduction = process.env.NODE_ENV === 'production'
+
+const globals = {
+    react: 'React',
+    'react-dom': 'ReactDOM',
+    '@wordpress/blocks': 'wp.blocks',
+    '@wordpress/i18n': 'wp.i18n',
+    '@wordpress/element': 'wp.element',
+    '@babel/runtime/helpers/toConsumableArray': '_toConsumableArray',
+    '@babel/runtime/helpers/slicedToArray': '_slicedToArray',
 }
 
-function fileExists(name) {
-    try {
-        return fs.statSync(name).isFile()
-    } catch {
-        return false
-    }
-}
-
-function jsConfig(name) {
-    return {
-        input: `./src/js/${name}.js`,
-        output: {
-            file: `./assets/js/${name}.min.js`,
-            format: 'iife',
-            minimize: true,
-        },
-        plugins: jsPluginConfig,
-    }
-}
-
-function cssConfig(name) {
-    return {
-        input: `./src/css/${name}.css`,
-        output: {
-            file: `./assets/css/${name}.min.css`,
-        },
-        plugins: cssPluginConfig,
-    }
-}
-
-function blockScriptConfig(name, blockPath, outputPath) {
-    let srcPath = path.join(blockPath, `${name}.js`)
-    if (!fileExists(srcPath)) {
-        return
-    }
-
-    return {
-        input: srcPath,
-        output: {
-            file: `${outputPath}/${name}.min.js`,
-            format: 'iife',
-            minimize: true,
-        },
-        plugins: jsPluginConfig,
-    }
-}
-
-function blockStyleConfig(name, blockPath, outputPath) {
-    let srcPath = path.join(blockPath, `${name}.css`)
-
-    if (!fileExists(srcPath)) {
-        return
-    }
-
-    return {
-        input: srcPath,
-        output: {
-            file: `${outputPath}/${name}.min.css`,
-        },
-        plugins: cssPluginConfig,
-    }
-}
+const external = [
+    'react',
+    'react-dom',
+    '@wordpress/blocks',
+    '@wordpress/i18n',
+    '@wordpress/element',
+    '@babel/runtime/helpers/toConsumableArray',
+    '@babel/runtime/helpers/slicedToArray',
+]
 
 const cssPluginConfig = [
     postcss({
@@ -94,67 +46,82 @@ const cssPluginConfig = [
 const jsPluginConfig = [
     replace({
         preventAssignment: true,
-        'process.env.NODE_ENV': JSON.stringify('production'),
+        'process.env.NODE_ENV': JSON.stringify(
+            isProduction ? 'production' : 'development'
+        ),
     }),
     resolve(),
     json({ compact: true }),
     babel({
-        babelHelpers: 'bundled',
+        babelHelpers: 'runtime',
         presets: ['@babel/preset-env', '@babel/preset-react'],
+        plugins: ['@babel/plugin-transform-runtime'],
     }),
     commonjs(),
     wpResolve(),
     terser(),
 ]
 
-let config = []
+if (isProduction) {
+    jsPluginConfig.push(terser())
+}
+
+const config = []
+
+function globalJsConfig(name) {
+    return {
+        input: `./src/js/${name}.js`,
+        output: {
+            file: `./assets/js/${name}.min.js`,
+            format: 'iife',
+            globals,
+        },
+        external,
+        plugins: jsPluginConfig,
+    }
+}
+
+function globalCssConfig(name) {
+    return {
+        input: `./src/css/${name}.css`,
+        output: {
+            file: `./assets/css/${name}.min.css`,
+        },
+        plugins: cssPluginConfig,
+    }
+}
 
 // core setup for main (frontend), admin and editor scripts and styles
 const core = ['main', 'admin', 'editor']
+
 core.forEach((name) => {
-    config.push(cssConfig(name), jsConfig(name))
+    config.push(globalCssConfig(name), globalJsConfig(name))
 })
 
-// block config setup
-const blocksDir = './blocks'
-const blocks = getDirectories(blocksDir)
+const blockScripts = await glob('./blocks/**/*.js')
+const blockStyles = await glob('./blocks/**/*.css')
 
-// add custom blocks to config
-blocks.forEach((blockName) => {
-    const blockPath = path.join(blocksDir, blockName)
-    const outputPath = `assets/blocks/${blockName}`
-
-    // // Check for JavaScript and CSS files
-    // const editorScript = path.join(blockPath, 'index.js')
-    // const viewScript = path.join(blockPath, 'view.js')
-    // const mainStyle = path.join(blockPath, 'style.css')
-    // const editorStyle = path.join(blockPath, 'editor.css')
-
-    const scriptArr = ['index', 'view']
-    const styleArr = [`style`, `editor`]
-
-    console.log(scriptArr)
-    console.log(styleArr)
-
-    scriptArr.forEach((script) => {
-        const blockJsConfig = blockScriptConfig(script, blockPath, outputPath)
-        if (blockJsConfig) {
-            config.push(blockJsConfig)
-        } else {
-            console.log(`${script} script doesn't exist`)
-        }
-    })
-
-    styleArr.forEach((style) => {
-        const blockCssConfig = blockStyleConfig(style, blockPath, outputPath)
-        if (blockCssConfig) {
-            config.push(blockCssConfig)
-        } else {
-            console.log(`${style} style doesn't exist`)
-        }
+blockScripts.forEach((script) => {
+    config.push({
+        input: script,
+        output: {
+            file: `./assets/${script.replace('.js', '.min.js')}`,
+            format: 'iife',
+            globals,
+        },
+        external,
+        plugins: jsPluginConfig,
     })
 })
 
-console.log(config)
+blockStyles.forEach((style) => {
+    config.push({
+        input: style,
+        output: {
+            file: `./assets/${style.replace('.css', '.min.css')}`,
+        },
+        plugins: cssPluginConfig,
+    })
+})
 
 export default config
