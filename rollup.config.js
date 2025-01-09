@@ -1,6 +1,7 @@
 import postcss from 'rollup-plugin-postcss'
 import resolve from '@rollup/plugin-node-resolve'
 import replace from '@rollup/plugin-replace'
+import terser from '@rollup/plugin-terser'
 import postcssNesting from 'postcss-nesting'
 import autoprefixer from 'autoprefixer'
 import postcssImport from 'postcss-import'
@@ -103,6 +104,7 @@ const jsPluginConfig = [
     }),
     commonjs(),
     wpResolve(),
+    terser(),
 ]
 
 let config = []

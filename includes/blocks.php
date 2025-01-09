@@ -126,27 +126,24 @@ add_action('enqueue_block_assets', function () use ($block_dirs)  {
     }
 
 	foreach ($block_assets as $block_name => $files) {
-		// $block_json = $block_dir . 'block.json';
 		$scoped_name = "kj/" . $block_name;
 
 		$block_dist_path = trailingslashit(get_stylesheet_directory() . '/assets/blocks/' . $block_name);
 		$block_dist_uri = trailingslashit(get_template_directory_uri() . '/assets/blocks/' . $block_name);
 
-		$view_script_name = $block_name . '-view-script';
-		$view_style_name = $block_name . '-view-style';
-
 		if ($files['has_script'] && has_block($scoped_name)) {
 			wp_enqueue_script(
-				$view_script_name, 
+				$block_name . '-view-script', 
 				$block_dist_uri . 'view.min.js', 
-				array('wp-blocks', 'wp-element', 'wp-editor')
+				array('wp-blocks', 'wp-element', 'wp-editor'),
+				filemtime($block_dist_path . 'view.min.css')
 			);
 		}
 
 		if ($files['has_style'] && has_block($scoped_name)) {
 
 			wp_enqueue_style(
-				$view_style_name, 
+				$block_name . '-view-style', 
 				$block_dist_uri . 'style.min.css', 
 				array(), 
 				filemtime($block_dist_path . 'style.min.css'), 
