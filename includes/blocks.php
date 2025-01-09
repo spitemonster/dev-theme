@@ -135,21 +135,25 @@ add_action('enqueue_block_assets', function () use ($_BLOCK_DIRS, $_BLOCK_SCOPE_
 		$block_dist_path = trailingslashit(get_stylesheet_directory() . '/assets/blocks/' . $block_name);
 		$block_dist_uri = trailingslashit(get_template_directory_uri() . '/assets/blocks/' . $block_name);
 
-		if ($files['has_script'] && has_block($scoped_name)) {
+		if (!has_block($scoped_name)) {
+			continue;
+		}
+
+		if ($files['has_script']) {
 			wp_enqueue_script(
 				$block_name . '-view-script', 
 				$block_dist_uri . 'view.min.js', 
 				array('wp-blocks', 'wp-element', 'wp-editor'),
-				filemtime($block_dist_path . 'style.min.css')
+				filemtime($block_dist_path . 'view.min.js')
 			);
 		}
 
-		if ($files['has_style'] && has_block($scoped_name)) {
+		if ($files['has_style']) {
 			wp_enqueue_style(
 				$block_name . '-view-style', 
 				$block_dist_uri . 'style.min.css', 
 				array(), 
-				filemtime($block_dist_path . 'view.min.js')
+				filemtime($block_dist_path . 'style.min.css')
 			);
 		}
 	}
