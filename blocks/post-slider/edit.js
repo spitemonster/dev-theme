@@ -124,17 +124,6 @@ export default function Edit({ attributes, setAttributes }) {
                     <ul>
                         {selectedPosts.map((post, index) => (
                             <li key={index}>
-                                {console.log('post', post)}
-                                {console.log('img: ', post.featuredImage)}
-                                {console.log(
-                                    'featured: ',
-                                    post.featuredImage,
-                                    useSelect((select) => {
-                                        select('core').getMedia(
-                                            post.featuredImage
-                                        )
-                                    })
-                                )}
                                 <figure className="post-card">
                                     {post.featuredImage ? (
                                         <img

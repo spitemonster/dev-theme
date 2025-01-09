@@ -5,7 +5,6 @@ import {
     RichText,
     MediaUpload,
     MediaUploadCheck,
-    URLInputButton,
 } from '@wordpress/block-editor'
 
 import { Button, ToolbarGroup, ToolbarButton } from '@wordpress/components'
@@ -19,10 +18,10 @@ export default function Edit({ attributes, setAttributes }) {
                 <ToolbarGroup>
                     <ToolbarButton
                         icon="admin-links"
-                        label={__('Edit Link', 'text-domain')}
+                        label={__('Edit Link', 'dev')}
                         onClick={() => {
                             const newUrl = prompt(
-                                __('Enter a URL:', 'text-domain'),
+                                __('Enter a URL:', 'dev'),
                                 url || ''
                             )
                             if (newUrl !== null) {
@@ -49,8 +48,8 @@ export default function Edit({ attributes, setAttributes }) {
                                 variant="secondary"
                             >
                                 {mediaURL
-                                    ? __('Change Image', 'text-domain')
-                                    : __('Open Media Library', 'text-domain')}
+                                    ? __('Change Image', 'dev')
+                                    : __('Open Media Library', 'dev')}
                             </Button>
                         )}
                     />
@@ -65,7 +64,7 @@ export default function Edit({ attributes, setAttributes }) {
                         onChange={(value) => setAttributes({ content: value })}
                         placeholder={__(
                             'Enter caption for selected image.',
-                            'text-domain'
+                            'dev'
                         )}
                     />
                 </figcaption>

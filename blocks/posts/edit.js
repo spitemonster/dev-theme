@@ -56,18 +56,18 @@ export default function Edit({ attributes, setAttributes }) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title="Post Type">
+                <PanelBody title={__('Post Type', 'dev')}>
                     <SelectControl
-                        label="Select Post Type"
+                        label={__('Select Post Type', 'dev')}
                         value={postType}
                         options={[
-                            { value: '', label: 'Select a Post Type' },
+                            { value: '', label: __('Select Post Type', 'dev') },
                             ...postTypes,
                         ]}
                         onChange={(postType) => setAttributes({ postType })}
                     />
                     <NumberControl
-                        label="Number of posts"
+                        label={__('Number of Posts', 'dev')}
                         value={postCount}
                         onChange={(count) =>
                             setAttributes({ postCount: count })
@@ -76,11 +76,11 @@ export default function Edit({ attributes, setAttributes }) {
                 </PanelBody>
             </InspectorControls>
             <div {...useBlockProps()}>
-                {!postType && 'Select a post type.'}
+                {!postType && __('Select a Post Type.', 'dev')}
 
-                {!posts && 'Loading'}
+                {!posts && __('Loading', 'dev')}
 
-                {posts && posts.length === 0 && 'No Posts'}
+                {posts && posts.length === 0 && __('No posts', 'dev')}
 
                 {posts && posts.length > 0 && (
                     <ul>
