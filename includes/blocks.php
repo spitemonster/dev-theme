@@ -132,12 +132,12 @@ add_action('enqueue_block_assets', function () use ($_BLOCK_DIRS, $_BLOCK_SCOPE_
 	foreach ($block_assets as $block_name => $files) {
 		$scoped_name = $_BLOCK_SCOPE_NAME . '/' . $block_name;
 
-		$block_dist_path = trailingslashit(get_stylesheet_directory() . '/assets/blocks/' . $block_name);
-		$block_dist_uri = trailingslashit(get_template_directory_uri() . '/assets/blocks/' . $block_name);
-
 		if (!has_block($scoped_name)) {
 			continue;
 		}
+
+		$block_dist_path = trailingslashit(get_stylesheet_directory() . '/assets/blocks/' . $block_name);
+		$block_dist_uri = trailingslashit(get_template_directory_uri() . '/assets/blocks/' . $block_name);
 
 		if ($files['has_script']) {
 			wp_enqueue_script(
