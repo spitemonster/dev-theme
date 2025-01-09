@@ -136,7 +136,7 @@ add_action('enqueue_block_assets', function () use ($block_dirs)  {
 				$block_name . '-view-script', 
 				$block_dist_uri . 'view.min.js', 
 				array('wp-blocks', 'wp-element', 'wp-editor'),
-				filemtime($block_dist_path . 'view.min.css')
+				filemtime($block_dist_path . 'style.min.css')
 			);
 		}
 
@@ -146,8 +146,7 @@ add_action('enqueue_block_assets', function () use ($block_dirs)  {
 				$block_name . '-view-style', 
 				$block_dist_uri . 'style.min.css', 
 				array(), 
-				filemtime($block_dist_path . 'style.min.css'), 
-				false
+				filemtime($block_dist_path . 'view.min.js')
 			);
 		}
 	}
