@@ -4,6 +4,7 @@
         "blaze-slider": "^1.9.3"
     },
     "devDependencies": {
+        "@babel/plugin-transform-destructuring": "^7.25.9",
         "@babel/runtime": "^7.26.0",
         "@rollup/plugin-node-resolve": "^16.0.0",
         "@rollup/plugin-replace": "^6.0.2",

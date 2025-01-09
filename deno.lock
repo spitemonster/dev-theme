@@ -5,6 +5,7 @@
     "jsr:@std/internal@^1.0.5": "1.0.5",
     "jsr:@std/path@*": "1.0.8",
     "npm:@babel/core@^7.24.4": "7.26.0",
+    "npm:@babel/plugin-transform-destructuring@^7.25.9": "7.25.9_@babel+core@7.26.0",
     "npm:@babel/plugin-transform-runtime@^7.25.9": "7.25.9_@babel+core@7.26.0",
     "npm:@babel/preset-env@^7.24.4": "7.26.0_@babel+core@7.26.0",
     "npm:@babel/preset-react@^7.24.1": "7.26.3_@babel+core@7.26.0",
@@ -2866,6 +2867,7 @@
     ],
     "packageJson": {
       "dependencies": [
+        "npm:@babel/plugin-transform-destructuring@^7.25.9",
         "npm:@babel/plugin-transform-runtime@^7.25.9",
         "npm:@babel/runtime@^7.26.0",
         "npm:@rollup/plugin-node-resolve@16",

@@ -10,7 +10,6 @@ import json from '@rollup/plugin-json'
 import { babel } from '@rollup/plugin-babel'
 import wpResolve from 'rollup-plugin-wp-resolve'
 import glob from 'fast-glob'
-// import fs from ''
 
 const isProduction = process.env.NODE_ENV === 'production'
 
@@ -27,9 +26,11 @@ const globals = {
 const external = [
     'react',
     'react-dom',
+    '@babel/runtime',
     '@wordpress/blocks',
     '@wordpress/i18n',
     '@wordpress/element',
+    '@babel/plugin-transform-destructuring',
     '@babel/runtime/helpers/toConsumableArray',
     '@babel/runtime/helpers/slicedToArray',
 ]
@@ -55,7 +56,7 @@ const jsPluginConfig = [
     babel({
         babelHelpers: 'runtime',
         presets: ['@babel/preset-env', '@babel/preset-react'],
-        plugins: ['@babel/plugin-transform-runtime'],
+        plugins: [['@babel/plugin-transform-runtime', { useESModules: true }]],
     }),
     commonjs(),
     wpResolve(),
