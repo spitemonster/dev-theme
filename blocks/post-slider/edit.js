@@ -8,6 +8,7 @@ export default function Edit({ attributes, setAttributes }) {
     const { selectedPostType, selectedPosts } = attributes
 
     const [postTypes, setPostTypes] = useState([])
+    const [fallbackImage, setFallbackImage] = useState([])
 
     // get all postTypes on load
     const availablePostTypes = useSelect((select) => {
@@ -37,6 +38,13 @@ export default function Edit({ attributes, setAttributes }) {
             setPostTypes(formattedPostTypes)
         }
     }, [availablePostTypes])
+
+    useEffect(() => {
+        fetch('https://dev.local/wp-json/site-settings/v1/fallback-image')
+            .then((res) => res.json())
+            .then((data) => setFallbackImage(data))
+            .catch((err) => console.err(err))
+    }, [])
 
     const posts = useSelect(
         (select) =>
@@ -122,26 +130,30 @@ export default function Edit({ attributes, setAttributes }) {
 
                 {selectedPosts && selectedPosts.length > 0 && (
                     <ul>
-                        {selectedPosts.map((post, index) => (
-                            <li key={index}>
-                                <figure className="post-card">
-                                    {post.featuredImage ? (
-                                        <img
-                                            src={wp.data
-                                                .select('core')
-                                                .getMedia(post.featuredImage)}
-                                        />
-                                    ) : (
-                                        <h1>No fallback image</h1>
-                                    )}
-                                    <figcaption>
-                                        {post?.excerpt?.raw != ''
-                                            ? post.excerpt?.raw
-                                            : post.title}
-                                    </figcaption>
-                                </figure>
-                            </li>
-                        ))}
+                        {selectedPosts.map((post, index) => {
+                            let imgSrc = fallbackImage
+
+                            if (post.featuredImage) {
+                                const res = wp.data
+                                    .select('core')
+                                    .getMedia(post.featuredImage)
+
+                                if (res) imgSrc = res.link
+                            }
+
+                            return (
+                                <li key={index}>
+                                    <figure className="post-card">
+                                        <img src={imgSrc} />
+                                        <figcaption>
+                                            {post?.excerpt?.raw != ''
+                                                ? post.excerpt?.raw
+                                                : post.title}
+                                        </figcaption>
+                                    </figure>
+                                </li>
+                            )
+                        })}
                     </ul>
                 )}
             </div>

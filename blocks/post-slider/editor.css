@@ -1,2 +1,11 @@
-.wp-block-kj-posts {
+@import './style.css';
+
+.wp-block-kj-post-slider {
+    ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        display: flex;
+        gap: 1rem;
+    }
 }
