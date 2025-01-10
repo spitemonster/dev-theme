@@ -1,6 +1,6 @@
 <?php
 $_BLOCK_SCOPE_NAME = 'kj';
-$_BLOCK_DIRS = glob(get_stylesheet_directory() . '/blocks/*/', GLOB_ONLYDIR);
+$_BLOCK_DIRS = glob(get_stylesheet_directory() . '/assets/blocks/*/', GLOB_ONLYDIR);
 
 add_action('init', function () use ($_BLOCK_DIRS) {
     foreach ($_BLOCK_DIRS as $block_dir) {
@@ -10,7 +10,9 @@ add_action('init', function () use ($_BLOCK_DIRS) {
 			continue;
 		}
 
-        register_block_type(dirname($block_json));
+		// die(var_dump($block_json));
+
+        register_block_type($block_json);
     }
 });
 
@@ -21,6 +23,7 @@ add_action('enqueue_block_editor_assets', function() use ($_BLOCK_DIRS, $_BLOCK_
 		$block_json = $block_dir . 'block.json';
 
 		if (!file_exists($block_json)) {
+			die(var_dump('no block'));
 			continue;
 		}
 		
@@ -128,6 +131,8 @@ add_action('enqueue_block_assets', function () use ($_BLOCK_DIRS, $_BLOCK_SCOPE_
         }
         set_transient($block_cache_key, $block_assets, HOUR_IN_SECONDS);
     }
+
+	// die(var_dump(get_transient($block_cache_key)));
 
 	foreach ($block_assets as $block_name => $files) {
 		$scoped_name = $_BLOCK_SCOPE_NAME . '/' . $block_name;

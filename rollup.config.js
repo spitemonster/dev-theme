@@ -10,6 +10,7 @@ import json from '@rollup/plugin-json'
 import { babel } from '@rollup/plugin-babel'
 import wpResolve from 'rollup-plugin-wp-resolve'
 import glob from 'fast-glob'
+import copy from 'rollup-plugin-copy'
 
 const isProduction = process.env.NODE_ENV === 'production'
 
@@ -60,7 +61,6 @@ const jsPluginConfig = [
     }),
     commonjs(),
     wpResolve(),
-    terser(),
 ]
 
 if (isProduction) {
@@ -101,8 +101,53 @@ core.forEach((name) => {
 
 const blockScripts = await glob('./blocks/**/*.js')
 const blockStyles = await glob('./blocks/**/*.css')
+const blockMeta = await glob('./blocks/**/block.json')
+const blockViews = await glob('./blocks/**/render.php')
+
+const copiedConfig = new Set()
 
 blockScripts.forEach((script) => {
+    // get the relevant block.json
+    const blockDir = script.replace(/\/[^/]+\.js$/, '')
+    let meta = blockMeta.find((m) => m.startsWith(blockDir))
+    let render = blockViews.find((v) => v.startsWith(blockDir))
+
+    const copyConfig = []
+    const targetConfig = []
+
+    if (meta && !copiedConfig.has(meta)) {
+        targetConfig.push({
+            src: meta,
+            dest: meta
+                .replace('/blocks', '/assets/blocks')
+                .replace('block.json', ''),
+        })
+
+        copiedConfig.add(meta)
+    } else {
+        meta = false
+    }
+
+    if (render && !copiedConfig.has(render)) {
+        targetConfig.push({
+            src: render,
+            dest: render
+                .replace('/blocks', '/assets/blocks')
+                .replace('render.php', ''),
+        })
+        copiedConfig.add(render)
+    } else {
+        render = false
+    }
+
+    if (render || meta) {
+        copyConfig.push(
+            copy({
+                targets: targetConfig,
+            })
+        )
+    }
+
     config.push({
         input: script,
         output: {
@@ -111,7 +156,7 @@ blockScripts.forEach((script) => {
             globals,
         },
         external,
-        plugins: jsPluginConfig,
+        plugins: [...jsPluginConfig, ...copyConfig],
     })
 })
 
