@@ -109,8 +109,8 @@ const copiedConfig = new Set()
 blockScripts.forEach((script) => {
     // get the relevant block.json
     const blockDir = script.replace(/\/[^/]+\.js$/, '')
-    let meta = blockMeta.find((m) => m.startsWith(blockDir))
-    let render = blockViews.find((v) => v.startsWith(blockDir))
+    const meta = blockMeta.find((m) => m.startsWith(blockDir))
+    const render = blockViews.find((v) => v.startsWith(blockDir))
 
     const copyConfig = []
     const targetConfig = []
@@ -124,8 +124,6 @@ blockScripts.forEach((script) => {
         })
 
         copiedConfig.add(meta)
-    } else {
-        meta = false
     }
 
     if (render && !copiedConfig.has(render)) {
@@ -136,11 +134,8 @@ blockScripts.forEach((script) => {
                 .replace('render.php', ''),
         })
         copiedConfig.add(render)
-    } else {
-        render = false
     }
-
-    if (render || meta) {
+    if (targetConfig.length > 0) {
         copyConfig.push(
             copy({
                 targets: targetConfig,
