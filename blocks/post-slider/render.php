@@ -1,16 +1,21 @@
 <?php
-	$selected_posts = $attributes["selectedPosts"];
+	extract($attributes);
+
 	$post_ids = array_map(function($item) {
 		return (int)$item["id"];
-	}, $selected_posts);
+	}, $selectedPosts);
 
 	$posts = get_posts([
 		'include' => $post_ids,
-		'numberposts' => 3,
+		'numberposts' => count($post_ids),
 		'post_type' => $attributes["selectedPostType"]
 	]);
 ?>
-<div class="post-slider blaze-slider">
+<div class="post-slider blaze-slider" 
+	data-posts-visible="<?= $postsVisible; ?>" 
+	data-posts-to-slide="<?= $postsToSlide; ?>" 
+	data-autoplay="<?= $autoplay; ?>" 
+	data-loop="<?= $loop; ?>">
 	<div class="blaze-container">
 		<div class="blaze-track-container">
 			<ul class="blaze-track">

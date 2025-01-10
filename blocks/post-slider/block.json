@@ -19,6 +19,22 @@
         "selectedPosts": {
             "type": "array",
             "default": []
+        },
+        "postsVisible": {
+            "type": "number",
+            "default": 3
+        },
+        "postsToSlide": {
+            "type": "number",
+            "default": 1
+        },
+        "autoplay": {
+            "type": "boolean",
+            "default": false
+        },
+        "loop": {
+            "type": "boolean",
+            "default": true
         }
     },
     "textdomain": "testimonial-slider",

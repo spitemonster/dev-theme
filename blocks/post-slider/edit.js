@@ -1,11 +1,25 @@
 import { __ } from '@wordpress/i18n'
 import { useBlockProps, InspectorControls } from '@wordpress/block-editor'
 import { useSelect } from '@wordpress/data'
-import { SelectControl, PanelBody, FormTokenField } from '@wordpress/components'
-import { useState, useEffect } from 'react'
+import {
+    SelectControl,
+    PanelBody,
+    FormTokenField,
+    __experimentalNumberControl as NumberControl,
+    ToggleControl,
+} from '@wordpress/components'
+import apiFetch from '@wordpress/api-fetch'
+import { useState, useEffect, useCallback } from 'react'
 
 export default function Edit({ attributes, setAttributes }) {
-    const { selectedPostType, selectedPosts } = attributes
+    const {
+        selectedPostType,
+        selectedPosts,
+        postsVisible,
+        postsToSlide,
+        autoplay,
+        loop,
+    } = attributes
 
     const [postTypes, setPostTypes] = useState([])
     const [fallbackImage, setFallbackImage] = useState([])
@@ -39,11 +53,11 @@ export default function Edit({ attributes, setAttributes }) {
         }
     }, [availablePostTypes])
 
+    // grab fallback image from custom api endpoint
     useEffect(() => {
-        fetch('https://dev.local/wp-json/site-settings/v1/fallback-image')
-            .then((res) => res.json())
+        apiFetch({ path: '/site-settings/v1/fallback-image' })
             .then((data) => setFallbackImage(data))
-            .catch((err) => console.err(err))
+            .catch(console.error)
     }, [])
 
     const posts = useSelect(
@@ -67,28 +81,27 @@ export default function Edit({ attributes, setAttributes }) {
           })
         : []
 
-    const handlePostSelection = (tokens) => {
-        const selected = tokens
-            .map((token) => {
+    const handlePostSelection = useCallback(
+        (tokens) => {
+            const selected = tokens.reduce((acc, token) => {
                 const matchingPost = postOptions.find(
                     (post) => post.title === token
                 )
-
-                if (matchingPost == null) {
-                    return null
+                if (matchingPost) {
+                    acc.push({
+                        id: matchingPost.id,
+                        title: matchingPost.title.raw,
+                        excerpt: matchingPost.excerpt.raw,
+                        featuredImage: matchingPost.featured_media,
+                    })
                 }
+                return acc
+            }, [])
 
-                return {
-                    id: matchingPost.id,
-                    title: matchingPost.title.raw,
-                    excerpt: matchingPost.excerpt.raw,
-                    featuredImage: matchingPost.featured_media,
-                }
-            })
-            .filter(Boolean)
-
-        setAttributes({ selectedPosts: selected })
-    }
+            setAttributes({ selectedPosts: selected })
+        },
+        [postOptions, setAttributes]
+    )
 
     return (
         <>
@@ -119,6 +132,38 @@ export default function Edit({ attributes, setAttributes }) {
                         suggestions={postOptions.map((post) => post.title)}
                         onChange={handlePostSelection}
                     />
+                    <NumberControl
+                        __next40pxDefaultSize
+                        label={__('Posts Visible', 'kj')}
+                        value={postsVisible}
+                        min={1}
+                        max={selectedPosts.length}
+                        onChange={(value) =>
+                            setAttributes({ postsVisible: value })
+                        }
+                    />
+                    <NumberControl
+                        __next40pxDefaultSize
+                        label={__('Posts to Slide', 'kj')}
+                        value={postsToSlide}
+                        min={1}
+                        max={selectedPosts.length}
+                        onChange={(value) =>
+                            setAttributes({ postsToSlide: value })
+                        }
+                    />
+                    <ToggleControl
+                        label={__('Autoplay', 'kj')}
+                        value={autoplay}
+                        checked={autoplay}
+                        onChange={(value) => setAttributes({ autoplay: value })}
+                    />
+                    <ToggleControl
+                        label={__('Loop', 'kj')}
+                        value={loop}
+                        checked={loop}
+                        onChange={(value) => setAttributes({ loop: value })}
+                    />
                 </PanelBody>
             </InspectorControls>
             <div {...useBlockProps()}>
@@ -146,9 +191,9 @@ export default function Edit({ attributes, setAttributes }) {
                                     <figure className="post-card">
                                         <img src={imgSrc} />
                                         <figcaption>
-                                            {post?.excerpt?.raw != ''
-                                                ? post.excerpt?.raw
-                                                : post.title}
+                                            {post?.excerpt?.raw ||
+                                                post?.title ||
+                                                __('No title available', 'kj')}
                                         </figcaption>
                                     </figure>
                                 </li>
