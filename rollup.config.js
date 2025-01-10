@@ -93,9 +93,7 @@ function globalCssConfig(name) {
 }
 
 // core setup for main (frontend), admin and editor scripts and styles
-const core = ['main', 'admin', 'editor']
-
-core.forEach((name) => {
+;['main', 'admin', 'editor'].forEach((name) => {
     config.push(globalCssConfig(name), globalJsConfig(name))
 })
 
@@ -107,16 +105,17 @@ const blockViews = await glob('./blocks/**/render.php')
 const copiedConfig = new Set()
 
 blockScripts.forEach((script) => {
-    // get the relevant block.json
     const blockDir = script.replace(/\/[^/]+\.js$/, '')
+    // check if there's block meta or a render template in the block directory
     const meta = blockMeta.find((m) => m.startsWith(blockDir))
     const render = blockViews.find((v) => v.startsWith(blockDir))
 
     const copyConfig = []
-    const targetConfig = []
+    const copyTargetConfig = []
 
+    // if meta, add it to the copy config and then ensure it's not copied twice
     if (meta && !copiedConfig.has(meta)) {
-        targetConfig.push({
+        copyTargetConfig.push({
             src: meta,
             dest: meta
                 .replace('/blocks', '/assets/blocks')
@@ -126,8 +125,9 @@ blockScripts.forEach((script) => {
         copiedConfig.add(meta)
     }
 
+    // add render template to copy config
     if (render && !copiedConfig.has(render)) {
-        targetConfig.push({
+        copyTargetConfig.push({
             src: render,
             dest: render
                 .replace('/blocks', '/assets/blocks')
@@ -135,10 +135,12 @@ blockScripts.forEach((script) => {
         })
         copiedConfig.add(render)
     }
-    if (targetConfig.length > 0) {
+
+    // if anything was added to the copy targets, add the config to the copy method
+    if (copyTargetConfig.length > 0) {
         copyConfig.push(
             copy({
-                targets: targetConfig,
+                targets: copyTargetConfig,
             })
         )
     }
