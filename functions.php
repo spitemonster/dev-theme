@@ -15,7 +15,8 @@
     },
     [
         'blocks',
-		'post-types'
+		'post-types',
+		'api'
     ]
 );
 
