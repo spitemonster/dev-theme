@@ -16,7 +16,8 @@
     [
         'blocks',
 		'post-types',
-		'api'
+		'api',
+        'block-styles'
     ]
 );
 
@@ -38,16 +39,17 @@ add_action('after_setup_theme', function () {
 	remove_theme_support('core-block-patterns');
 });
 
-add_action( 'admin_enqueue_scripts', function( $hook ) {
-    if ( 'edit.php' == $hook ) {
-		wp_enqueue_style('editor-style', get_stylesheet_directory_uri() . '/assets/css/editor.min.css');
-    	wp_enqueue_script( 'editor-script', get_stylesheet_directory_uri() . '/assets/js/editor.min.js');	
-        return;
+add_action('enqueue_block_assets', function() {
+    if (is_admin()) {
+        wp_enqueue_style('editor-style', get_stylesheet_directory_uri() . '/assets/css/editor.min.css');
+        wp_enqueue_script( 'editor-script', get_stylesheet_directory_uri() . '/assets/js/editor.min.js', ['wp-dom-ready', 'wp-blocks', 'wp-element', 'wp-editor']);	   
     }
+});
 
+add_action( 'admin_enqueue_scripts', function( $hook ) {
 	wp_enqueue_style('admin-style', get_stylesheet_directory_uri() . '/assets/css/admin.min.css');
     wp_enqueue_script( 'admin-script', get_stylesheet_directory_uri() . '/assets/js/admin.min.js');
-} );
+});
 
 add_action('wp_enqueue_scripts', function() {
 	wp_enqueue_style('main-style', get_stylesheet_directory_uri() . '/assets/css/main.min.css');

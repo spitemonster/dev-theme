@@ -2,29 +2,35 @@
 $_BLOCK_SCOPE_NAME = 'kj';
 $_BLOCK_DIRS = glob(get_stylesheet_directory() . '/assets/blocks/*/', GLOB_ONLYDIR);
 
-add_action('init', function () use ($_BLOCK_DIRS) {
-    foreach ($_BLOCK_DIRS as $block_dir) {
+
+add_action('init', function() use ($_BLOCK_DIRS) {
+
+	foreach ($_BLOCK_DIRS as $block_dir) {
 		$block_json = $block_dir . 'block.json';
 
 		if (!file_exists($block_json)) {
 			continue;
 		}
 
-		// die(var_dump($block_json));
-
         register_block_type($block_json);
     }
-});
+}, 10, 1);
 
 // enqueue editor scripts and styles
 add_action('enqueue_block_editor_assets', function() use ($_BLOCK_DIRS, $_BLOCK_SCOPE_NAME) {
-	// in the editor i don't really care to do a bunch of lookups; it probably isn't hurting performance that bad 
+	// TODO: Optimize block directory lookups by caching the results in a transient.
+	// This will reduce the number of file system operations by storing the block directories
+	// in a transient and only updating it when the block directories change.
+	// Steps:
+	// 1. Check if a transient with the block directories exists.
+	// 2. If it exists, use the cached block directories.
+	// 3. If it does not exist or is expired, perform the directory lookup and store the result in a transient.
 	foreach ($_BLOCK_DIRS as $block_dir) {
 		$block_json = $block_dir . 'block.json';
 
+		// no ticket.
 		if (!file_exists($block_json)) {
-			die(var_dump('no block'));
-			continue;
+		$block_dist_path = trailingslashit(get_template_directory() . '/assets/blocks/' . $block_name);
 		}
 		
 		$block_name = basename($block_dir);
@@ -97,13 +103,11 @@ add_action('enqueue_block_editor_assets', function() use ($_BLOCK_DIRS, $_BLOCK_
 }, 10, 2);
 
 // front end scripts and styles
+// to ensure we're always delivering the most up to date scripts
+// but also not running file_exists on every script and style for every block on every page load
+// cache block assets in a transient for 1 hour and enqueue the results if the block dir hasn't had any updates
 add_action('enqueue_block_assets', function () use ($_BLOCK_DIRS, $_BLOCK_SCOPE_NAME)  {
 	$block_cache_key = 'block_view_assets';
-
-	// a little worried about a bunch of file_exists lookups on the user side
-	// so we use a transient to store the presence of view scripts and styles
-	// on enqueue, test if any directories inside /blocks have been updated
-	// if so, clear the transient and rebuild it
 	$last_modified = array_reduce($_BLOCK_DIRS, function ($carry, $dir) {
         return max($carry, filemtime($dir));
     }, 0);
@@ -131,8 +135,6 @@ add_action('enqueue_block_assets', function () use ($_BLOCK_DIRS, $_BLOCK_SCOPE_
         }
         set_transient($block_cache_key, $block_assets, HOUR_IN_SECONDS);
     }
-
-	// die(var_dump(get_transient($block_cache_key)));
 
 	foreach ($block_assets as $block_name => $files) {
 		$scoped_name = $_BLOCK_SCOPE_NAME . '/' . $block_name;

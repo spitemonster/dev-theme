@@ -2,3 +2,4 @@ node_modules
 assets
 .vscode
 .env
+.DS_Store

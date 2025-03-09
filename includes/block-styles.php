@@ -2,5 +2,5 @@
 
 add_action('init', function()
 {
-	// register post types
+	// Register block styles
 });

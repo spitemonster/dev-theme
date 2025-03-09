@@ -14,7 +14,7 @@ import copy from 'rollup-plugin-copy'
 
 const isProduction = process.env.NODE_ENV === 'production'
 
-const globals = {
+const jsGlobals = {
     react: 'React',
     'react-dom': 'ReactDOM',
     '@wordpress/blocks': 'wp.blocks',
@@ -24,7 +24,7 @@ const globals = {
     '@babel/runtime/helpers/slicedToArray': '_slicedToArray',
 }
 
-const external = [
+const jsExternals = [
     'react',
     'react-dom',
     '@babel/runtime',
@@ -34,15 +34,6 @@ const external = [
     '@babel/plugin-transform-destructuring',
     '@babel/runtime/helpers/toConsumableArray',
     '@babel/runtime/helpers/slicedToArray',
-]
-
-const cssPluginConfig = [
-    postcss({
-        extract: true,
-        minimize: true,
-        syntax: 'postcss-scss',
-        plugins: [postcssImport(), autoprefixer(), postcssNesting()],
-    }),
 ]
 
 const jsPluginConfig = [
@@ -63,6 +54,7 @@ const jsPluginConfig = [
     wpResolve(),
 ]
 
+// mangle and minify js in production
 if (isProduction) {
     jsPluginConfig.push(terser())
 }
@@ -75,9 +67,9 @@ function globalJsConfig(name) {
         output: {
             file: `./assets/js/${name}.min.js`,
             format: 'iife',
-            globals,
+            globals: jsGlobals,
         },
-        external,
+        external: jsExternals,
         plugins: jsPluginConfig,
     }
 }
@@ -88,7 +80,12 @@ function globalCssConfig(name) {
         output: {
             file: `./assets/css/${name}.min.css`,
         },
-        plugins: cssPluginConfig,
+        plugins: postcss({
+            extract: true,
+            minimize: isProduction,
+            syntax: 'postcss-scss',
+            plugins: [postcssImport({ root: process.cwd() }), autoprefixer(), postcssNesting()],
+        }),
     }
 }
 
@@ -150,9 +147,9 @@ blockScripts.forEach((script) => {
         output: {
             file: `./assets/${script.replace('.js', '.min.js')}`,
             format: 'iife',
-            globals,
+            globals: jsGlobals,
         },
-        external,
+        external: jsExternals,
         plugins: [...jsPluginConfig, ...copyConfig],
     })
 })
@@ -163,7 +160,12 @@ blockStyles.forEach((style) => {
         output: {
             file: `./assets/${style.replace('.css', '.min.css')}`,
         },
-        plugins: cssPluginConfig,
+        plugins: postcss({
+            extract: true,
+            minimize: isProduction,
+            syntax: 'postcss-scss',
+            plugins: [postcssImport({ root: process.cwd() }), autoprefixer(), postcssNesting()],
+        }),
     })
 })
 
